@@ -1,0 +1,13 @@
+{
+  "platforms":
+  [
+    {
+      "name": "slack",
+      "uri": "hooks.slack.com"
+    },
+    {
+      "name": "discord",
+      "uri": "discordapp.com"
+    }
+  ]
+}

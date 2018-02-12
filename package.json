@@ -1,0 +1,22 @@
+{
+  "name": "stellar-webhooks",
+  "version": "1.0.0",
+  "description": "A third party webhook publisher for Stellar events using Horizon API streaming.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "webhooks",
+    "stellar"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "nedb": "^1.8.0",
+    "requestretry": "^1.13.0",
+    "stellar-sdk": "^0.8.0"
+  }
+}
