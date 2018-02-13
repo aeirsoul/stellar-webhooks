@@ -5,7 +5,7 @@ let Datastore = require('nedb');
 let db = new Datastore({ filename: 'db/events.db', autoload: true });
 let request = require('requestretry');
 
-//TODO config + replace thumbnails
+//TODO config + replace thumbnails with local
 let sendPayload = function (url, fallback, acc_id, type, op_href, op_title, op_value, ts) {
   request({
     method: 'POST',
@@ -32,10 +32,9 @@ let sendPayload = function (url, fallback, acc_id, type, op_href, op_title, op_v
                     "short": false
                 }
             ],
-            "image_url": "http://my-website.com/path/to/image.jpg",
-            "thumb_url": "http://example.com/path/to/thumb.png",
+            "thumb_url": "https://www.stellar.org/wp-content/themes/stellar/images/stellar-rocket-300.png",
             "footer": "Stellar Webhooks",
-            "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+            "footer_icon": "https://www.stellar.org/wp-content/themes/stellar/images/stellar-rocket-300.png",
             "ts": ts
         }
       ]
@@ -61,9 +60,9 @@ let errorHandler = function(err) {
 }
 
 let messageHandler = function (res) {
+  //console.log(res);
   //interpret type of event - perform lookup for registered clients - deliver payload
   if(res.type.includes('account') || res.type.includes('signer')) {
-    //console.log(res);
     let timestamp = Date.now()/1000;
     let asset_code = 'XLM';
     if(res.asset_type && res.asset_type !== 'native') {
@@ -71,21 +70,22 @@ let messageHandler = function (res) {
     }
 
     //lookup event type and account id
-    db.find({ type: res.type, id: res.account }, function(err, accs) {
+    db.find({ type: res.type, address: res.account }, function(err, accs) {
       if(!err) {
         //send payload to registered urls
         for(let i = 0; i < accs.length; i++) {
           let acc = accs[i];
           for(let j = 0; j < acc.urls.length; j++) {
             let url = acc.urls[j];
-            console.log(accs.length + " "+acc.urls.length);
             //send payload depending on type
             if(res.type === 'account_credited') {
+              //TODO check correct asset code/issuer
               sendPayload(url.url,
                           res.account+" credited with "+res.amount+" "+asset_code, res.account,
                           "Account Credited", res._links.operation.href,
                           "Amount", "+"+res.amount+" "+asset_code, timestamp);
             } else if (res.type === 'account_debited') {
+              //TODO check correct asset code/issuer
               sendPayload(url.url,
                           res.amount+" "+asset_code+" debited from "+res.account, res.account,
                           "Account Debited", res._links.operation.href,
@@ -97,9 +97,24 @@ let messageHandler = function (res) {
                           "Balance", res.starting_balance+" "+asset_code, timestamp);
             } else if (res.type === 'account_removed') {
               sendPayload(url.url,
-                          res.account+" removed", res.account,
+                          res.account+" Account Removed", res.account,
                           "Account Removed", res._links.operation.href,
                           "", "", timestamp);
+            } else if (res.type === 'signer_created') {
+              sendPayload(url.url,
+                          "Signer created on "+res.account, res.account,
+                          "Signer Created", res._links.operation.href,
+                          "Weight", res.weight, timestamp);
+            } else if (res.type === 'signer_removed') {
+              sendPayload(url.url,
+                          "Signer removed on "+res.account, res.account,
+                          "Signer Removed", res._links.operation.href,
+                          "", "", timestamp);
+            } else if (res.type === 'signer_updated') {
+              sendPayload(url.url,
+                          "Signer updated on "+res.account, res.account,
+                          "Signer Updated", res._links.operation.href,
+                          "Weight", res.weight, timestamp);
             }
           }
         }
@@ -114,8 +129,10 @@ let messageHandler = function (res) {
   //}
 }
 
-server.effects().cursor("now").stream({
-  onmessage: messageHandler,
-  onerror: errorHandler,
-  onopen: openHandler
-});
+exports.runWebhookStream = function() {
+  server.effects().cursor("now").stream({
+    onmessage: messageHandler,
+    onerror: errorHandler,
+    onopen: openHandler
+  });
+}

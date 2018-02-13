@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stellar Webhooks</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+  <link rel="stylesheet" href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+  <script
+    src="http://code.jquery.com/jquery-3.3.1.slim.js"
+    integrity="sha256-fNXJFIlca05BIO2Y5zh1xrShK3ME+/lYZ0j+ChxX2DA="
+    crossorigin="anonymous">
+  </script>
+  <style>
+    #asset_code {
+      text-transform: uppercase;
+    }
+
+    #address_id {
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Enter Your Webhook</h2>
+    <blockquote id="feedback_quote">
+      <h3 id="feedback">Please Fill Out The Form</h3>
+    </blockquote>
+    <form id="webhook_form">
+      <fieldset>
+        <label for="webhook_type">Webhook Event</label>
+        <select id="webhook_type">
+          <option value="account_credited">Account Credited</option>
+          <option value="account_debited">Account Debited</option>
+          <option value="account_created">Account Created</option>
+          <option value="account_removed">Account Removed</option>
+          <option value="signer_created">Signer Created</option>
+          <option value="signer_removed">Signer Removed</option>
+          <option value="signer_updated">Signer Updated</option>
+        </select>
+
+        <label id="address_id_label" for="address_id">Stellar Address</label>
+        <input type="text" placeholder="Address" id="address_id">
+
+        <label id="asset_code_label" for="asset_code">Asset Code</label>
+        <input type="text" placeholder="XLM" value="XLM" id="asset_code">
+
+        <label id="asset_address_label" for="asset_address">Asset Issuer Address</label>
+        <input type="text" placeholder="Issuing Address" id="asset_address">
+
+        <label for="webhook_url">Webhook URL</label>
+        <input type="text" placeholder="http://webhook.example.com" id="webhook_url">
+        <input class="button-primary" type="submit" value="Send">
+      </fieldset>
+    </form>
+  </div>
+  <script>
+    $(document).ready(function() {
+      //Upon page load
+      $('#asset_code_label').hide();
+      $('#asset_code').hide();
+      $('#asset_address').hide();
+      $('#asset_address_label').hide();
+
+      var assetToggle = function(asset_code) {
+        if(asset_code.val() != 'XLM') {
+          $('#asset_address').show();
+          $('#asset_address_label').show();
+        } else {
+          $('#asset_address').hide();
+          $('#asset_address_label').hide();
+        }
+      }
+
+      //Callbacks
+      $('#webhook_type').on('change', function(e) {
+        if(!$(this).val().includes('credited') && !$(this).val().includes('debited')) {
+          $('#asset_code_label').hide();
+          $('#asset_code').hide();
+          $('#asset_address_label').hide();
+          $('#asset_address').hide();
+        } else {
+          $('#asset_code_label').show();
+          $('#asset_code').show();
+          assetToggle($('#asset_code'));
+        }
+      });
+
+      $('#asset_code').on('change', function(e) {
+        assetToggle($(this));
+      })
+    });
+
+    //TODO - redo with jquery
+    //TODO - add client side validation
+    var form = document.getElementById("webhook_form");
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      processSubmit();
+    });
+
+    function processSubmit() {
+      var xmlhttp = new XMLHttpRequest();
+      //Manually do this -
+      var a = form.elements['webhook_type'].value;
+      var b = form.elements['address_id'].value;
+      var c = form.elements['asset_code'].value;
+      var d = form.elements['asset_address'].value;
+      var e = form.elements['webhook_url'].value;
+
+      xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var feedback = JSON.parse(xmlhttp.responseText);
+            if(feedback.status == 'error') {
+              $('#feedback').text(feedback.message);
+              $('#feedback_quote').css('border-left-color','#f96b27');
+            } else if (feedback.status == 'warning') {
+              $('#feedback').text(feedback.message);
+              $('#feedback_quote').css('border-left-color','#f4e45c');
+            } else {
+              $('#feedback').text(feedback.message);
+              $('#feedback_quote').css('border-left-color','#b2d833');
+            }
+          } else if (xmlhttp.readyState == 4) {
+            var feedback = JSON.parse(xmlhttp.responseText);
+            $('#feedback').text("Bad Request: "+feedback.message);
+            $('#feedback_quote').css('border-left-color','#f96b27');
+          }
+      }
+
+      xmlhttp.open("POST","/register",true);
+      xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      xmlhttp.send("webhook_type="+encodeURIComponent(a)+
+                    "&address_id="+encodeURIComponent(b)+
+                    "&asset_code="+encodeURIComponent(c)+
+                    "&asset_address="+encodeURIComponent(d)+
+                    "&webhook_url="+encodeURIComponent(e)
+                  );
+
+      return false;
+    }
+  </script>
+</body>
+
+</html>

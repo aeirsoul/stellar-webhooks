@@ -1,6 +1,6 @@
 {
   "name": "stellar-webhooks",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A third party webhook publisher for Stellar events using Horizon API streaming.",
   "main": "index.js",
   "scripts": {
