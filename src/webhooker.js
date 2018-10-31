@@ -1,13 +1,17 @@
 let config = require('../config');
 let StellarSdk = require('stellar-sdk');
 let Datastore = require('nedb');
+let path = require('path');
 let request = require('requestretry');
 
 let stellarApi = config.isTestNet
 	? 'https://horizon-testnet.stellar.org'
 	: 'https://horizon.stellar.org/';
 let server = new StellarSdk.Server(stellarApi);
-let db = new Datastore({ filename: `db/${config.dbFileName}`, autoload: true });
+let db = new Datastore({
+	filename: path.join(__dirname + `/db/${config.dbFileName}`),
+	autoload: true
+});
 
 let sendPayload = function(
 	url,
@@ -73,7 +77,7 @@ let openHandler = function(res) {
 };
 
 let errorHandler = function(err) {
-	console.log(err);
+	//console.log(err);
 };
 
 let messageHandler = function(res) {

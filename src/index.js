@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', function(req, res) {
-	res.sendFile(path.join(__dirname + '/index.html'));
+	res.sendFile(path.join(__dirname + '/ui/index.html'));
 });
 
 app.post('/register', function(req, res) {
@@ -143,6 +143,7 @@ app.post('/register', function(req, res) {
 						},
 						function (err, count, doc, upsert) {
 							if (!err) {
+								console.log('update', upsert);
 								return res.send(
 									JSON.stringify({
 										status: 'success',
