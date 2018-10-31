@@ -66,7 +66,7 @@ let sendPayload = function(
 				console.log('Delivered');
 			} else {
 				//TODO Not delivered - increase error count once all retries are done?
-				console.error('Issue sending payload! ' + err);
+				console.error('Issue sending payload! ' + err, body);
 			}
 		}
 	);
