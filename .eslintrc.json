@@ -1,0 +1,40 @@
+{
+    "env": {
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "prettier"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 6
+    },
+    "plugins": [
+        "prettier"
+    ],
+    "rules": {
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "prettier/prettier": [
+            "warn",
+            {
+                "singleQuote": true,
+                "useTabs": true
+            }
+        ]
+    }
+}

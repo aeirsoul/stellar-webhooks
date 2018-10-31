@@ -1,6 +1,5 @@
 {
-  "platforms":
-  [
+  "platforms": [
     {
       "name": "slack",
       "uri": "hooks.slack.com"
@@ -9,5 +8,10 @@
       "name": "discord",
       "uri": "discordapp.com"
     }
-  ]
+  ],
+  "retryAttempts": 5,
+  "retryDelay": 5000,
+  "dbCompactInterval": 60,
+  "isTestNet": true,
+  "dbFileName": "events.db"
 }
