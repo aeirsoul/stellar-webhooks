@@ -8,4 +8,5 @@
 - Complete minimal UI for viewing currently created webhooks, with ability to remove
 - Modularise for different webhook platforms based on config
 - Modularise different effect types including trustline and offers
+- Useful error messages and logging
 - Advanced webhook features such as exponential backoff
